@@ -12,6 +12,7 @@ type Pesquisa = {
 }
 
 const STORAGE_KEY = 'crmplus.satisfacao.pesquisas'
+const AUTOMATION_KEY = 'crmplus.satisfacao.automacao'
 
 export default function SatisfacaoPage() {
   const [pesquisas, setPesquisas] = useState<Pesquisa[]>([])
@@ -21,11 +22,19 @@ export default function SatisfacaoPage() {
   useEffect(() => {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (raw) setPesquisas(JSON.parse(raw))
+    const automation = window.localStorage.getItem(AUTOMATION_KEY)
+    if (automation !== null) setAutomacao(automation === 'true')
   }, [])
 
   function persist(next: Pesquisa[]) {
     setPesquisas(next)
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  }
+
+  function toggleAutomacao() {
+    const next = !automacao
+    setAutomacao(next)
+    window.localStorage.setItem(AUTOMATION_KEY, String(next))
   }
 
   function criarPesquisa(event: FormEvent<HTMLFormElement>) {
@@ -46,61 +55,53 @@ export default function SatisfacaoPage() {
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <Link href="/" className="back">← Todos os apps</Link>
+        <Link href="/" className="back">← Apps</Link>
         <div className="module-name">Satisfação</div>
         <nav className="nav">
           <div className="nav-item active">Pesquisas</div>
-          <div className="nav-item">Respostas</div>
-          <div className="nav-item">Automação</div>
         </nav>
-        <div className="sidebar-foot">Dados de teste permanecem somente neste navegador.</div>
+        <div className="sidebar-foot">
+          <div className="row-top">
+            <span>Automação</span>
+            <button className="button secondary" onClick={toggleAutomacao}>{automacao ? 'Ativa' : 'Pausada'}</button>
+          </div>
+        </div>
       </aside>
 
       <section className="workspace">
         <header className="page-head">
-          <div>
-            <h2>Pesquisas</h2>
-            <p>Crie a pergunta, defina o canal e acompanhe o retorno. O módulo existe para ouvir e fechar o ciclo do feedback.</p>
-          </div>
+          <h2>Pesquisas</h2>
           <button className="button" onClick={() => setShowForm((value) => !value)}>Nova pesquisa</button>
         </header>
 
         {showForm && (
           <form className="form" onSubmit={criarPesquisa}>
             <div className="form-grid">
-              <div className="field"><label>Nome da pesquisa</label><input name="nome" required autoFocus /></div>
+              <div className="field"><label>Nome</label><input name="nome" required autoFocus /></div>
               <div className="field"><label>Canal</label><select name="canal"><option>Link</option><option>WhatsApp</option><option>Email</option></select></div>
             </div>
-            <div className="field"><label>Pergunta principal</label><textarea name="pergunta" required /></div>
-            <div><button className="button" type="submit">Criar pesquisa</button></div>
+            <div className="field"><label>Pergunta</label><textarea name="pergunta" required /></div>
+            <div><button className="button" type="submit">Criar</button></div>
           </form>
         )}
 
         <div className="board">
           {pesquisas.length === 0 ? (
-            <div className="empty"><strong>Nenhuma pesquisa criada.</strong>Crie uma pesquisa para testar a experiência localmente neste navegador.</div>
+            <div className="empty"><strong>Nenhuma pesquisa</strong></div>
           ) : pesquisas.map((pesquisa) => (
             <article className="row" key={pesquisa.id}>
               <div className="row-top">
-                <div><div className="row-title">{pesquisa.nome}</div><div className="row-meta">{pesquisa.pergunta}</div></div>
+                <div>
+                  <div className="row-title">{pesquisa.nome}</div>
+                  <div className="row-meta">{pesquisa.pergunta}</div>
+                </div>
                 <span className="status">{pesquisa.canal}</span>
               </div>
-              <div><button className="button secondary" onClick={() => navigator.clipboard?.writeText(`${location.origin}/satisfacao/responder/${pesquisa.id}`)}>Copiar link de teste</button></div>
+              <div>
+                <button className="button secondary" onClick={() => navigator.clipboard?.writeText(`${location.origin}/satisfacao/responder/${pesquisa.id}`)}>Copiar link</button>
+              </div>
             </article>
           ))}
-        </div>
-
-        <section className="automation">
-          <div className="automation-copy">
-            <strong>Automação de retorno</strong>
-            <span>Cada resposta poderá acionar regras e integrações exclusivas deste módulo.</span>
-          </div>
-          <button className="button secondary" onClick={() => setAutomacao((value) => !value)}>{automacao ? 'Ativa' : 'Pausada'}</button>
-        </section>
-        <div className="rule-list">
-          <div className="rule">Resposta recebida → registrar no Supabase exclusivo de Satisfação.</div>
-          <div className="rule">Feedback crítico → acionar webhook próprio para tratamento.</div>
-          <div className="rule">Arquivo anexado → armazenar no R2 exclusivo de Satisfação.</div>
         </div>
       </section>
     </main>
