@@ -78,7 +78,7 @@ export default function SatisfacaoPage() {
     if (responses) setRespostas(JSON.parse(responses))
     const cases = window.localStorage.getItem(CASE_KEY)
     if (cases) {
-      const parsed = JSON.parse(cases) as Array<Partial<Loop> & { status?: string }>
+      const parsed = JSON.parse(cases) as Array<Omit<Partial<Loop>, 'status'> & { status?: string }>
       setLoops(parsed.map((item) => ({
         id: String(item.id), pesquisaId: String(item.pesquisaId), respostaId: String(item.respostaId),
         status: item.status === 'Resolvida' || item.status === 'Resolvido' ? 'Resolvido' : item.status === 'Em tratamento' ? 'Em tratamento' : 'Novo',
