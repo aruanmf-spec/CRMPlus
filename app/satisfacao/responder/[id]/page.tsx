@@ -28,10 +28,8 @@ const RESPONSE_KEY = 'crmplus.satisfacao.respostas'
 const CASE_KEY = 'crmplus.satisfacao.tratativas'
 const AUTOMATION_KEY = 'crmplus.satisfacao.automacao'
 
-function isNegative(metrica: Metrica, nota: number) {
-  if (metrica === 'NPS') return nota <= 6
-  if (metrica === 'CSAT') return nota <= 2
-  return nota <= 3
+function shouldOpenLoop(metrica: Metrica, nota: number) {
+  return metrica === 'NPS' && nota <= 6
 }
 
 function scaleFor(metrica: Metrica) {
@@ -74,7 +72,7 @@ export default function ResponderPage() {
     window.localStorage.setItem(RESPONSE_KEY, JSON.stringify([resposta, ...respostas]))
 
     const automation = window.localStorage.getItem(AUTOMATION_KEY) !== 'false'
-    if (automation && isNegative(pesquisa.metrica, nota)) {
+    if (automation && shouldOpenLoop(pesquisa.metrica, nota)) {
       const caseRaw = window.localStorage.getItem(CASE_KEY)
       const cases = caseRaw ? JSON.parse(caseRaw) : []
       cases.unshift({
