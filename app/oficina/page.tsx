@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 
-type Status = 'Entrada' | 'Diagnóstico' | 'Aprovação' | 'Execução' | 'Conferência' | 'Entrega'
+type Status = 'Abertura' | 'Programação' | 'Execução' | 'Checklist' | 'Validação' | 'Concluído'
 
 type Ordem = {
   id: string
@@ -29,13 +29,24 @@ const AUTOMATION_KEY = 'crmplus.oficina.automacao'
 const EVENT_KEY = 'crmplus.oficina.eventos'
 
 const stages: { key: Status; action?: string }[] = [
-  { key: 'Entrada', action: 'Iniciar diagnóstico' },
-  { key: 'Diagnóstico', action: 'Enviar para aprovação' },
-  { key: 'Aprovação', action: 'Iniciar serviço' },
-  { key: 'Execução', action: 'Iniciar conferência' },
-  { key: 'Conferência', action: 'Concluir entrega' },
-  { key: 'Entrega' }
+  { key: 'Abertura', action: 'Programar atendimento' },
+  { key: 'Programação', action: 'Iniciar atendimento' },
+  { key: 'Execução', action: 'Abrir checklist' },
+  { key: 'Checklist', action: 'Enviar para validação' },
+  { key: 'Validação', action: 'Validar e concluir' },
+  { key: 'Concluído' }
 ]
+
+function normalizeStatus(value: string): Status {
+  if (value === 'Entrada') return 'Abertura'
+  if (value === 'Diagnóstico' || value === 'Aprovação') return 'Programação'
+  if (value === 'Execução') return 'Execução'
+  if (value === 'Conferência') return 'Checklist'
+  if (value === 'Validação') return 'Validação'
+  if (value === 'Entrega' || value === 'Pronto' || value === 'Concluído') return 'Concluído'
+  if (value === 'Abertura' || value === 'Programação' || value === 'Checklist') return value
+  return 'Abertura'
+}
 
 function osNumber(id: string) {
   return `OS ${id.slice(0, 6).toUpperCase()}`
@@ -63,16 +74,19 @@ export default function OficinaPage() {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as Array<Omit<Ordem, 'status'> & { status: string }>
-      const normalized = parsed.map((item) => ({
-        ...item,
-        status: (item.status === 'Pronto' ? 'Entrega' : item.status) as Status
-      }))
+      const normalized = parsed.map((item) => ({ ...item, status: normalizeStatus(item.status) }))
       setOrdens(normalized)
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
       if (normalized.length) setSelectedId(normalized[0].id)
     }
 
     const history = window.localStorage.getItem(EVENT_KEY)
-    if (history) setEventos(JSON.parse(history))
+    if (history) {
+      const parsed = JSON.parse(history) as Array<Omit<Evento, 'status'> & { status: string }>
+      const normalized = parsed.map((item) => ({ ...item, status: normalizeStatus(item.status) }))
+      setEventos(normalized)
+      window.localStorage.setItem(EVENT_KEY, JSON.stringify(normalized))
+    }
 
     const automation = window.localStorage.getItem(AUTOMATION_KEY)
     if (automation !== null) setAutomacao(automation === 'true')
@@ -97,7 +111,7 @@ export default function OficinaPage() {
     return [{
       id: `created-${selected.id}`,
       ordemId: selected.id,
-      status: 'Entrada' as Status,
+      status: 'Abertura' as Status,
       createdAt: selected.createdAt,
       queued: false
     }]
@@ -136,11 +150,11 @@ export default function OficinaPage() {
       veiculo: String(form.get('veiculo') || ''),
       servico: String(form.get('servico') || ''),
       tecnico: String(form.get('tecnico') || ''),
-      status: 'Entrada',
+      status: 'Abertura',
       createdAt: new Date().toISOString()
     }
     persist([ordem, ...ordens])
-    recordEvent(ordem.id, 'Entrada')
+    recordEvent(ordem.id, 'Abertura')
     setSelectedId(ordem.id)
     event.currentTarget.reset()
     setShowForm(false)
