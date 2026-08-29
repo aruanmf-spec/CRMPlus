@@ -79,7 +79,7 @@ export default function ResponderPage() {
         id: crypto.randomUUID(),
         pesquisaId: pesquisa.id,
         respostaId: resposta.id,
-        status: 'Aberta',
+        status: 'Novo',
         createdAt: new Date().toISOString()
       })
       window.localStorage.setItem(CASE_KEY, JSON.stringify(cases))
