@@ -2,50 +2,29 @@ import Link from 'next/link'
 import styles from './home.module.css'
 
 const apps = [
-  {
-    title: 'Oficina',
-    href: '/oficina',
-    purpose: 'Operação de oficina',
-    description: 'Recepção, execução e entrega em um fluxo único.',
-    visual: 'workshop'
-  },
-  {
-    title: 'Satisfação',
-    href: '/satisfacao',
-    purpose: 'Pesquisa de satisfação',
-    description: 'Envio, resposta e tratamento sem misturar marketing.',
-    visual: 'satisfaction'
-  }
+  { title: 'Oficina', href: '/oficina', visual: 'workshop' },
+  { title: 'Satisfação', href: '/satisfacao', visual: 'satisfaction' }
 ]
 
 function WorkshopVisual() {
   return (
     <div className={styles.workshopVisual} aria-hidden="true">
       <div className={styles.miniHeader}>
-        <span>Ordem de serviço</span>
-        <span>Em execução</span>
+        <span>Ordens</span>
+        <span>Execução</span>
       </div>
       <div className={styles.workshopFlow}>
         <div className={styles.flowColumn}>
           <small>Entrada</small>
-          <div className={styles.flowTicket}>
-            <strong>Veículo recebido</strong>
-            <span>Diagnóstico inicial</span>
-          </div>
+          <div className={styles.flowTicket}><strong>OS 1842</strong></div>
         </div>
         <div className={styles.flowColumn}>
           <small>Execução</small>
-          <div className={`${styles.flowTicket} ${styles.flowTicketActive}`}>
-            <strong>Serviço em andamento</strong>
-            <span>Etapa atual visível</span>
-          </div>
+          <div className={`${styles.flowTicket} ${styles.flowTicketActive}`}><strong>OS 1841</strong></div>
         </div>
         <div className={styles.flowColumn}>
-          <small>Entrega</small>
-          <div className={styles.flowTicket}>
-            <strong>Conferência final</strong>
-            <span>Pronto para saída</span>
-          </div>
+          <small>Pronto</small>
+          <div className={styles.flowTicket}><strong>OS 1840</strong></div>
         </div>
       </div>
     </div>
@@ -56,8 +35,8 @@ function SatisfactionVisual() {
   return (
     <div className={styles.satisfactionVisual} aria-hidden="true">
       <div className={styles.miniHeader}>
-        <span>Pesquisa pós-atendimento</span>
-        <span>Automação ativa</span>
+        <span>Pesquisa</span>
+        <span>Ativa</span>
       </div>
       <div className={styles.questionBox}>
         <small>Como foi sua experiência?</small>
@@ -68,9 +47,8 @@ function SatisfactionVisual() {
         </div>
       </div>
       <div className={styles.responseStrip}>
-        <span>Resposta recebida</span>
-        <span>Classificar</span>
-        <span>Tratar retorno</span>
+        <span>Resposta</span>
+        <span>Tratamento</span>
       </div>
     </div>
   )
@@ -81,13 +59,11 @@ export default function Home() {
     <main className={styles.home}>
       <header className={styles.header}>
         <div className={styles.brand}>CRM PLUS</div>
-        <div className={styles.headerNote}>Aplicativos</div>
       </header>
 
       <section className={styles.library} aria-labelledby="apps-title">
         <div className={styles.libraryHead}>
-          <h1 id="apps-title">Escolha um app</h1>
-          <p>Entre direto no trabalho que precisa ser feito.</p>
+          <h1 id="apps-title">Apps</h1>
         </div>
 
         <div className={styles.rail}>
@@ -97,14 +73,8 @@ export default function Home() {
                 {app.visual === 'workshop' ? <WorkshopVisual /> : <SatisfactionVisual />}
                 <div className={styles.scrim} />
                 <div className={styles.cardCopy}>
-                  <span>{app.purpose}</span>
                   <h2>{app.title}</h2>
-                  <p>{app.description}</p>
                 </div>
-              </div>
-              <div className={styles.cardAction}>
-                <span>Abrir aplicativo</span>
-                <span aria-hidden="true">→</span>
               </div>
             </Link>
           ))}
