@@ -37,10 +37,10 @@ export default function OficinaPage() {
   useEffect(() => {
     const raw = window.localStorage.getItem(STORAGE_KEY)
     if (raw) {
-      const parsed = JSON.parse(raw) as Ordem[]
+      const parsed = JSON.parse(raw) as Array<Omit<Ordem, 'status'> & { status: string }>
       setOrdens(parsed.map((item) => ({
         ...item,
-        status: item.status === 'Pronto' ? 'Entrega' : item.status
+        status: (item.status === 'Pronto' ? 'Entrega' : item.status) as Status
       })))
     }
     const automation = window.localStorage.getItem(AUTOMATION_KEY)
